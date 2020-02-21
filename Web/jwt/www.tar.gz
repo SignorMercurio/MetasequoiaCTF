@@ -1,0 +1,67 @@
+def defense(input_str):
+    for c in input_str:
+        if c not in string.letters and c not in string.digits:
+            return False
+    return True
+
+@app.route("/reg",methods=['POST'])
+def reg():
+    regname = request.form['regname']
+    if regname == "admin":
+        return jsonify(result=False,)
+    regpass = request.form['regpass']
+    if len(regname) < 5 or len(regname) > 20 or len(regpass) < 5 or len(regpass) > 20 or not defense(regname) or not defense(regpass) or User.query.filter_by(username=regname,).first():
+        return jsonify(result=False,)
+    private_pem = rsa.exportKey()
+    public_pem = rsa.publickey().exportKey()
+    key_name = getmd5(regname + regpass)
+    with open('./key/' + key_name + '.pem', 'w') as f:
+        f.write(private_pem)
+    with open('./pubkey/' + key_name + '.pem', 'w') as f:
+        f.write(public_pem)
+    if regname == "admin":
+        priv = "admin"
+    else:
+        priv = "other"
+    token = jwt.encode({'name': regname,'priv': priv}, private_pem, algorithm='RS256')
+    user = User(regname, regpass, priv, key_name, token)
+    db.session.add(user)
+    db.session.commit()
+    return jsonify(result=True,)
+
+@app.route("/list",methods=["GET"])
+def list():
+    try:
+        post_token = request.headers['Authorization'][7:]
+    except:
+        return jsonify(result=False,)
+    name = getname(post_token, "name")
+    if name == False:
+        return jsonify(result=False,)
+    priv = getname(post_token, "priv")
+    if priv == False:
+        return jsonify(result=False,)
+    if priv == "other":
+        li = Link.query.filter_by(username=name,)
+        links = []
+        for lin in li:
+            links.append(name + ":" + lin.link)
+        return jsonify(result=True,username=name,links=links)
+    if priv == "admin":
+        li = Link.query.filter_by()
+        links = []
+        for lin in li:
+            links.append(lin.username + ":" + lin.link)
+        return jsonify(result=True,username="admin",links=links)
+
+@app.route("/pubkey/<key>",methods=["GET"])
+def getkey(key):
+    try:
+        with open('./pubkey/' + key + '.pem', 'r') as f:
+            secret = f.read()
+        return jsonify(result=True,pubkey=secret,)
+    except:
+        return jsonify(result=False,)
+
+
+app.run(debug=False,host='0.0.0.0')

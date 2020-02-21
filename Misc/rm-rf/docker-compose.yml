@@ -1,0 +1,17 @@
+version: '2'
+services:
+  service:
+    build: .
+    image: docker-misc
+    ports:
+      - 9999:10000
+    volumes:
+      - "$PWD/flag:/.flag"
+    tty: true
+    networks:
+      - net
+
+networks:
+  net:
+    external:
+      name: h1ve_frp_containers

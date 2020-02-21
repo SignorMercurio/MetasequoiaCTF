@@ -1,0 +1,37 @@
+<html>
+
+<head>
+    <title>Easy Calc</title>
+</head>
+
+<body>
+    <div id="container">
+        <h1>Easy Calc</h1>
+        <div id="codeArea">
+            <form method=POST>
+                <textarea class="form-control" name="code" rows="8"></textarea>
+                <input type="submit" class="button" value="Calc">
+            </form>
+        </div>
+        {% if history %}
+        <div id="history">
+            {% for item in history %}
+            <div class="item">
+                Formatted calculation: <div class="code">{{ item['code'] }}</div>
+                <div></div>
+                {% if item['error'] %}
+                Error: <div class="error">{{ item['error'] }}</div>
+                {% else %}
+                Result: <div class="result">{{ item['result'] }}</div>
+                {% endif %}
+            </div>
+            {% if not loop.last %}
+            <div class="divider"></div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>
