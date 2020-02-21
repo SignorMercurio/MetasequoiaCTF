@@ -44,3 +44,5 @@ sla('Skill > ',payload)
 ```
 
 注意链接时`libmagic.so`的目录，我放在和源程序同一目录下因此使用选项`-L.`。同时`/usr/lib/`下也需要有`libmagic.so`。
+
+此外，感谢TaQini师傅提供的非预期解：直接ret2libc。
